@@ -4,10 +4,7 @@
 #include <string>
 #include <vector>
 
-enum class NodeType {
-    CARPETA,
-    ARCHIVO
-};
+enum class NodeType { CARPETA, ARCHIVO };
 
 class Node {
 public:
@@ -15,12 +12,12 @@ public:
     std::string nombre;
     NodeType tipo;
     std::string contenido;
-    std::vector<Node*> children;
     Node* parent;
+    std::vector<Node*> children;
 
-    Node(int _id, const std::string& _nombre, NodeType _tipo)
-        : id(_id), nombre(_nombre), tipo(_tipo), parent(nullptr) {}
+    Node(int id, const std::string& n, NodeType t);
 
+    void addChild(Node* n);
 };
 
 #endif

@@ -6,12 +6,14 @@
 class Tree {
 private:
     Node* root;
-    int nextId;
 
 public:
     Tree();
 
-    Node* getRoot() const { return root; }
+    void setRoot(Node* r);
+    Node* getRoot();
+
+    Node* buscarPorID(Node* actual, int id);
 };
 
 #endif
