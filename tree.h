@@ -2,18 +2,31 @@
 #define TREE_H
 
 #include "node.h"
+#include <vector>
 
 class Tree {
 private:
     Node* root;
 
+    Node* insertar(Node* actual, int id, const std::string& nombre);
+    void inOrden(Node* actual) const;
+    Node* buscar(Node* actual, int id);
+    Node* eliminar(Node* actual, int id);
+    Node* nodoMinimo(Node* actual);
+
+    void serializar(Node* actual, std::vector<std::pair<int,std::string>>& datos);
+
 public:
     Tree();
 
-    void setRoot(Node* r);
-    Node* getRoot();
+    void insertar(int id, const std::string& nombre);
+    void mostrar() const;
+    Node* buscar(int id);
+    void eliminar(int id);
 
-    Node* buscarPorID(Node* actual, int id);
+    // JSON
+    std::vector<std::pair<int,std::string>> exportar();
+    void importar(const std::vector<std::pair<int,std::string>>& datos);
 };
 
 #endif

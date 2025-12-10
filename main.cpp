@@ -1,70 +1,58 @@
 #include <iostream>
 #include "tree.h"
-#include "json_manager.h"
-
-using namespace std;
+#include "JSONManager.h"
 
 int main() {
-    Tree tree;
+    Tree arbol;
 
-    // árbol inicial
-    Node* root = new Node(1, "root", NodeType::CARPETA);
-    tree.setRoot(root);
-
-    int op;
-
+    int opcion;
     do {
-        cout << "\n--- MENU ---\n";
-        cout << "1. Agregar nodo\n";
-        cout << "2. Guardar JSON\n";
-        cout << "3. Cargar JSON\n";
-        cout << "0. Salir\n";
-        cout << "Opcion: ";
-        cin >> op;
+        std::cout << "\n--- MENU ---\n";
+        std::cout << "1. Insertar\n";
+        std::cout << "2. Mostrar\n";
+        std::cout << "3. Buscar\n";
+        std::cout << "4. Eliminar\n";
+        std::cout << "5. Guardar JSON\n";
+        std::cout << "6. Cargar JSON\n";
+        std::cout << "0. Salir\n> ";
+        std::cin >> opcion;
 
-        if (op == 1) {
-            int idPadre, id;
-            string nombre;
-            int tipoInt;
-
-            cout << "ID del padre: ";
-            cin >> idPadre;
-
-            Node* padre = tree.buscarPorID(tree.getRoot(), idPadre);
-            if (!padre) {
-                cout << "Padre no encontrado\n";
-                continue;
-            }
-
-            cout << "Nuevo ID: ";
-            cin >> id;
-            cout << "Nombre: ";
-            cin >> nombre;
-            cout << "Tipo (0 carpeta / 1 archivo): ";
-            cin >> tipoInt;
-
-            NodeType t = (tipoInt == 0) ? NodeType::CARPETA : NodeType::ARCHIVO;
-
-            padre->addChild(new Node(id, nombre, t));
-
-            cout << "Nodo creado.\n";
+        if (opcion == 1) {
+            int id; std::string nombre;
+            std::cout << "ID: "; std::cin >> id;
+            std::cout << "Nombre: "; std::cin >> nombre;
+            arbol.insertar(id, nombre);
         }
-
-        else if (op == 2) {
-            if (JSONManager::guardar("arbol.json", tree))
-                cout << "Guardado correctamente.\n";
+        else if (opcion == 2) {
+            arbol.mostrar();
+        }
+        else if (opcion == 3) {
+            int id;
+            std::cout << "ID a buscar: ";
+            std::cin >> id;
+            Node* n = arbol.buscar(id);
+            if (n) std::cout << "Encontrado: " << n->nombre << "\n";
+            else std::cout << "No existe.\n";
+        }
+        else if (opcion == 4) {
+            int id;
+            std::cout << "ID a eliminar: ";
+            std::cin >> id;
+            arbol.eliminar(id);
+        }
+        else if (opcion == 5) {
+            if (JSONManager::guardar("arbol.json", arbol.exportar()))
+                std::cout << "Guardado correctamente.\n";
             else
-                cout << "ERROR al guardar.\n";
+                std::cout << "Error guardando JSON.\n";
+        }
+        else if (opcion == 6) {
+            auto datos = JSONManager::cargar("arbol.json");
+            arbol.importar(datos);
+            std::cout << "Cargado correctamente.\n";
         }
 
-        else if (op == 3) {
-            if (JSONManager::cargar("arbol.json", tree))
-                cout << "Cargado correctamente.\n";
-            else
-                cout << "ERROR al cargar.\n";
-        }
-
-    } while (op != 0);
+    } while (opcion != 0);
 
     return 0;
 }
