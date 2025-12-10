@@ -3,118 +3,140 @@
 #include <sstream>
 #include <iostream>
 
-static std::string tabs(int n) {
-    return std::string(n, ' ');
-}
+// util indent
+static std::string indent(int n) { return std::string(n, ' '); }
 
-bool JSONManager::guardar(const std::string& filename, Tree& tree) {
-    std::ofstream file(filename);
-    if (!file) return false;
-
-    file << "{\n";
-    file << "\"root\": ";
-    escribirNodo(file, tree.getRoot(), 0);
-    file << "\n}\n";
-
-    return true;
-}
-
-void JSONManager::escribirNodo(std::ofstream& file, Node* nodo, int tab) {
-    file << "{\n";
-
-    file << tabs(tab+2) << "\"id\": " << nodo->id << ",\n";
-    file << tabs(tab+2) << "\"nombre\": \"" << nodo->nombre << "\",\n";
-    file << tabs(tab+2) << "\"tipo\": \""
-         << (nodo->tipo == NodeType::CARPETA ? "carpeta" : "archivo")
-         << "\",\n";
-    file << tabs(tab+2) << "\"contenido\": \"" << nodo->contenido << "\",\n";
-
-    file << tabs(tab+2) << "\"children\": [";
-    if (!nodo->children.empty()) file << "\n";
-
-    for (size_t i = 0; i < nodo->children.size(); i++) {
-        file << tabs(tab+4);
-        escribirNodo(file, nodo->children[i], tab+4);
-        if (i < nodo->children.size() - 1) file << ",";
-        file << "\n";
+// convertir nodo -> json manual
+static void nodeToJson(std::ofstream& f, Node* n, int tab) {
+    f << "{\n";
+    f << indent(tab+2) << "\"id\": " << n->id << ",\n";
+    f << indent(tab+2) << "\"nombre\": \"" << n->nombre << "\",\n";
+    f << indent(tab+2) << "\"tipo\": \"" << (n->tipo == NodeType::CARPETA ? "carpeta" : "archivo") << "\",\n";
+    f << indent(tab+2) << "\"contenido\": \"" << n->contenido << "\",\n";
+    f << indent(tab+2) << "\"children\": [\n";
+    for (size_t i = 0; i < n->children.size(); ++i) {
+        nodeToJson(f, n->children[i], tab+4);
+        if (i+1 < n->children.size()) f << ",\n";
+        else f << "\n";
     }
-
-    file << tabs(tab+2) << "]";
-    file << "\n" << tabs(tab) << "}";
+    f << indent(tab+2) << "]\n";
+    f << indent(tab) << "}";
 }
 
-bool JSONManager::cargar(const std::string& filename, Tree& tree) {
-    std::ifstream file(filename);
-    if (!file) return false;
-
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    std::string text = buffer.str();
-
-    size_t pos = text.find("\"root\"");
-    if (pos == std::string::npos) return false;
-
-    pos = text.find("{", pos);
-    if (pos == std::string::npos) return false;
-
-    std::string obj = text.substr(pos);
-
-    std::istringstream in(obj);
-    Node* newRoot = leerNodo(in);
-
-    if (!newRoot) return false;
-
-    tree.setRoot(newRoot);
-    return true;
-}
-
-Node* JSONManager::leerNodo(std::istream& in) {
+// parser simple: lee desde stream ya posicionado en '{' y construye Node*
+static Node* readNode(std::istream& in) {
     std::string token;
-    in >> token; // "{"
-    if (token != "{") return nullptr;
+    // consume '{' (may be adjacent)
+    char ch;
+    in >> ch;
+    if (ch != '{') return nullptr;
 
-    int id;
+    int id = -1;
     std::string nombre, tipoStr, contenido;
+    std::vector<Node*> children;
 
-    in >> token; // "id":
-    in >> id;
-    in >> token; // ,
+    std::string line;
+    while (std::getline(in, line)) {
+        // trim left spaces:
+        size_t p = line.find_first_not_of(" \t\r\n");
+        if (p == std::string::npos) continue;
+        std::string s = line.substr(p);
 
-    in >> token; // "nombre":
-    std::getline(in, token, '"');
-    std::getline(in, nombre, '"');
-    in >> token; // ,
-
-    in >> token; // "tipo":
-    std::getline(in, token, '"');
-    std::getline(in, tipoStr, '"');
-    in >> token; // ,
-
-    in >> token; // "contenido":
-    std::getline(in, token, '"');
-    std::getline(in, contenido, '"');
-    in >> token; // ,
-
-    in >> token; // "children":
-    in >> token; // [
-
-    Node* nodo = new Node(id, nombre, tipoStr == "carpeta" ? NodeType::CARPETA : NodeType::ARCHIVO);
-    nodo->contenido = contenido;
-
-    while (true) {
-        in >> token;
-        if (token == "]") break;
-
-        if (token == "{") {
-            in.putback('{');
-            Node* child = leerNodo(in);
-            nodo->addChild(child);
-
-            in >> token; // coma o ]
+        if (s.rfind("\"id\"",0) == 0) {
+            size_t pos = s.find(':'); if (pos!=std::string::npos) {
+                std::string val = s.substr(pos+1);
+                id = std::stoi(val);
+            }
+        } else if (s.rfind("\"nombre\"",0) == 0) {
+            size_t p1 = s.find('"', s.find(':'));
+            size_t p2 = s.find('"', p1+1);
+            nombre = s.substr(p1+1, p2-p1-1);
+        } else if (s.rfind("\"tipo\"",0) == 0) {
+            size_t p1 = s.find('"', s.find(':'));
+            size_t p2 = s.find('"', p1+1);
+            tipoStr = s.substr(p1+1, p2-p1-1);
+        } else if (s.rfind("\"contenido\"",0) == 0) {
+            size_t p1 = s.find('"', s.find(':'));
+            size_t p2 = s.find('"', p1+1);
+            contenido = s.substr(p1+1, p2-p1-1);
+        } else if (s.rfind("\"children\"",0) == 0) {
+            // next lines contain children array; read until ']'
+            // read line until encountering '[' then parse children blocks
+            while (std::getline(in, line)) {
+                size_t q = line.find_first_not_of(" \t\r\n");
+                if (q==std::string::npos) continue;
+                std::string t = line.substr(q);
+                if (t.size()>0 && t[0]=='[') {
+                    // start children
+                    break;
+                }
+            }
+            // read children elements: look for '{' start and ']' end
+            while (true) {
+                // peek next non-space char
+                char c;
+                while (in.get(c)) {
+                    if (!isspace((unsigned char)c)) { in.unget(); break; }
+                }
+                int next = in.peek();
+                if (next == ']') { // end of children
+                    std::getline(in, line); // consume ]
+                    break;
+                }
+                if (next == '{') {
+                    Node* child = readNode(in);
+                    if (child) children.push_back(child);
+                    // after readNode, there may be a comma or newline; consume until next non-space
+                    char cc;
+                    while (in.get(cc)) {
+                        if (cc==',' ) break;
+                        if (!isspace((unsigned char)cc)) { in.unget(); break; }
+                    }
+                } else {
+                    // consume line and continue
+                    if (!std::getline(in, line)) break;
+                }
+            }
+        } else if (s.size()>0 && s[0]=='}') {
+            // end of this node
+            Node* n = new Node(id, nombre, (tipoStr=="carpeta"?NodeType::CARPETA:NodeType::ARCHIVO));
+            n->contenido = contenido;
+            for (Node* c : children) n->addChild(c);
+            return n;
         }
     }
+    return nullptr;
+}
 
-    in >> token; // "}"
+// ----------------- API -----------------
+bool JSONManager::save(const std::string& filename, Tree& tree) {
+    std::ofstream f(filename);
+    if (!f.is_open()) return false;
+    f << "{\n";
+    f << "\"root\": ";
+    nodeToJson(f, tree.getRoot(), 0);
+    f << "\n}\n";
+    f.close();
+    return true;
+}
 
-    return nodo;
+bool JSONManager::load(const std::string& filename, Tree& tree) {
+    std::ifstream f(filename);
+    if (!f.is_open()) return false;
+    // read entire file into stringstream for easier parsing with getline
+    std::stringstream ss;
+    ss << f.rdbuf();
+    std::string content = ss.str();
+    std::istringstream in(content);
+    // find "root" and the first '{' after it
+    size_t pos = content.find("\"root\"");
+    if (pos == std::string::npos) return false;
+    size_t brace = content.find('{', pos);
+    if (brace == std::string::npos) return false;
+    // create substring starting at brace and parse using istringstream advanced to that position
+    std::istringstream in2(content.substr(brace));
+    Node* newRoot = readNode(in2);
+    if (!newRoot) return false;
+    tree.setRoot(newRoot);
+    return true;
 }

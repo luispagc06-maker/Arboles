@@ -6,12 +6,8 @@
 
 class JSONManager {
 public:
-    static bool guardar(const std::string& filename, Tree& tree);
-    static bool cargar(const std::string& filename, Tree& tree);
-
-private:
-    static void escribirNodo(std::ofstream& file, Node* nodo, int tab);
-    static Node* leerNodo(std::istream& in);
+    static bool save(const std::string& filename, Tree& tree);
+    static bool load(const std::string& filename, Tree& tree);
 };
 
 #endif
