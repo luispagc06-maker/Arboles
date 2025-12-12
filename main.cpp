@@ -1,27 +1,21 @@
 #include <iostream>
 #include "tree.h"
+#include "trie.h"
 #include "json_manager.h"
 #include "search_index.h"
 
 int main() {
-    Tree t;
-    SearchIndex idx;
+    Tree tree;
 
-    t.insert("/", "docs", NodeType::CARPETA);
-    t.insert("/docs", "archivo1", NodeType::ARCHIVO);
-    t.insert("/", "imagenes", NodeType::CARPETA);
+    Node* root = tree.insert(nullptr, 1, "root", CARPETA);
+    tree.insert(root, 2, "docs", CARPETA);
+    tree.insert(root, 3, "readme.txt", ARCHIVO);
 
-    idx.build(t.getRoot());
+    std::cout << "Arbol en preorden:\n";
+    tree.printPreorden(tree.getRoot());
 
-    std::cout << "Contenido árbol (preorder):\n";
-    for (Node* n : t.preorder())
-        std::cout << n->id << " - " << n->nombre << "\n";
+    JSONManager::guardar("arbol.json", tree);
 
-    auto sug = idx.suggest("a");
-    std::cout << "\nSugerencias para 'a':\n";
-    for (auto& s : sug) std::cout << s << "\n";
-
-    JSONManager::save("arbol.json", t);
-
+    std::cout << "\nArchivo JSON generado.\n";
     return 0;
 }

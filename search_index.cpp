@@ -1,23 +1,10 @@
 #include "search_index.h"
 
-void SearchIndex::indexRec(Node* n) {
-    map[n->nombre] = n;
-    trie.insert(n->nombre);
-    for (Node* c : n->children)
-        indexRec(c);
+void SearchIndex::add(const std::string& nombre, int id) {
+    tabla[nombre] = id;
 }
 
-void SearchIndex::build(Node* root) {
-    map.clear();
-    trie.clear();
-    if (root) indexRec(root);
-}
-
-Node* SearchIndex::findExact(const std::string& name) {
-    auto it = map.find(name);
-    return it == map.end() ? nullptr : it->second;
-}
-
-std::vector<std::string> SearchIndex::suggest(const std::string& prefix) {
-    return trie.autocomplete(prefix);
+int SearchIndex::buscar(const std::string& nombre) {
+    if (tabla.count(nombre)) return tabla[nombre];
+    return -1;
 }

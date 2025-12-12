@@ -6,8 +6,8 @@
 
 class JSONManager {
 public:
-    static bool save(const std::string& file, Tree& t);
-    static bool load(const std::string& file, Tree& t);
+    static bool guardar(const std::string& filename, Tree& tree);
+    static bool cargar(const std::string& filename, Tree& tree);
 };
 
 #endif

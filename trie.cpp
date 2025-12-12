@@ -1,42 +1,40 @@
 #include "trie.h"
 
-Trie::Trie() { root = new TrieNode(); }
-Trie::~Trie() { clear(); delete root; }
-
-void Trie::clearNode(TrieNode* n) {
-    for (auto& p : n->next)
-        clearNode(p.second);
-    delete n;
+Trie::Trie() {
+    root = new NodoTrie();
 }
 
-void Trie::clear() {
-    for (auto& p : root->next)
-        clearNode(p.second);
-    root->next.clear();
+Trie::~Trie() {
+    // Liberación recursiva omitida por simplicidad del proyecto
 }
 
-void Trie::insert(const std::string& word) {
-    TrieNode* cur = root;
-    for (char c : word) {
-        if (!cur->next[c]) cur->next[c] = new TrieNode();
-        cur = cur->next[c];
+void Trie::insertar(const std::string& palabra, int id) {
+    NodoTrie* act = root;
+    for (char c : palabra) {
+        if (!act->hijos[c])
+            act->hijos[c] = new NodoTrie();
+        act = act->hijos[c];
     }
-    cur->end = true;
+    act->fin = true;
+    act->ids.push_back(id);
 }
 
-void Trie::collect(TrieNode* n, std::string pref, std::vector<std::string>& out) {
-    if (n->end) out.push_back(pref);
-    for (auto& p : n->next)
-        collect(p.second, pref + p.first, out);
+void Trie::autoRecorrer(NodoTrie* nodo, std::string prefijo, std::vector<std::string>& out) {
+    if (nodo->fin)
+        out.push_back(prefijo);
+
+    for (auto& par : nodo->hijos)
+        autoRecorrer(par.second, prefijo + par.first, out);
 }
 
-std::vector<std::string> Trie::autocomplete(const std::string& prefix) {
-    TrieNode* cur = root;
-    for (char c : prefix) {
-        if (!cur->next[c]) return {};
-        cur = cur->next[c];
+std::vector<std::string> Trie::autocompletar(const std::string& prefijo) {
+    NodoTrie* act = root;
+    for (char c : prefijo) {
+        if (!act->hijos[c]) return {};
+        act = act->hijos[c];
     }
-    std::vector<std::string> r;
-    collect(cur, prefix, r);
-    return r;
+
+    std::vector<std::string> res;
+    autoRecorrer(act, prefijo, res);
+    return res;
 }

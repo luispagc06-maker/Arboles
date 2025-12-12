@@ -1,30 +1,31 @@
+
 #ifndef TRIE_H
 #define TRIE_H
 
-#include <unordered_map>
-#include <vector>
 #include <string>
-
-class TrieNode {
-public:
-    bool end;
-    std::unordered_map<char, TrieNode*> next;
-
-    TrieNode(): end(false) {}
-};
+#include <map>
+#include <vector>
 
 class Trie {
 private:
-    TrieNode* root;
-    void clearNode(TrieNode* n);
-    void collect(TrieNode* n, std::string pref, std::vector<std::string>& out);
+    struct NodoTrie {
+        bool fin;
+        std::map<char, NodoTrie*> hijos;
+        std::vector<int> ids;
+
+        NodoTrie() : fin(false) {}
+    };
+
+    NodoTrie* root;
+
+    void autoRecorrer(NodoTrie* nodo, std::string prefijo, std::vector<std::string>& out);
 
 public:
     Trie();
     ~Trie();
-    void clear();
-    void insert(const std::string& word);
-    std::vector<std::string> autocomplete(const std::string& prefix);
+
+    void insertar(const std::string& palabra, int id);
+    std::vector<std::string> autocompletar(const std::string& prefijo);
 };
 
 #endif

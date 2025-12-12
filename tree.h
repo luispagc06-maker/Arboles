@@ -3,33 +3,26 @@
 
 #include "node.h"
 #include <string>
-#include <vector>
 
 class Tree {
 private:
     Node* root;
-    int nextId;
-
-    void deleteSubtree(Node* n);
-    int findMaxId(Node* n);
-    std::vector<std::string> split(const std::string& path);
 
 public:
     Tree();
     ~Tree();
 
     Node* getRoot();
-    int getNextId() const;
+    void setRoot(Node* r);
 
-    Node* find(const std::string& path);
-    bool insert(const std::string& parent, const std::string& name, NodeType tipo);
-    bool renameNode(const std::string& path, const std::string& nuevo);
-    bool move(const std::string& origen, const std::string& destino);
-    bool removeToTrash(const std::string& path);
-    bool permanentDelete(const std::string& path);
-    bool restore(int id, const std::string& destino);
+    Node* findById(Node* actual, int id);
 
-    std::vector<Node*> preorder();
+    Node* insert(Node* parent, int id, const std::string& nombre, NodeType tipo);
+    bool remove(Node* nodo);
+    bool move(Node* nodo, Node* nuevoPadre);
+    bool rename(Node* nodo, const std::string& nuevoNombre);
+
+    void printPreorden(Node* n);
 };
 
 #endif
