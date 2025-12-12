@@ -1,45 +1,42 @@
 #include "trie.h"
-#include <stack>
 
 Trie::Trie() { root = new TrieNode(); }
+Trie::~Trie() { clear(); delete root; }
 
-Trie::~Trie() { clear(); }
+void Trie::clearNode(TrieNode* n) {
+    for (auto& p : n->next)
+        clearNode(p.second);
+    delete n;
+}
 
 void Trie::clear() {
-    if (!root) return;
-    // eliminar recursivamente
-    std::stack<TrieNode*> st;
-    st.push(root);
-    while (!st.empty()) {
-        TrieNode* t = st.top(); st.pop();
-        for (auto &p : t->next) st.push(p.second);
-        delete t;
-    }
-    root = new TrieNode();
+    for (auto& p : root->next)
+        clearNode(p.second);
+    root->next.clear();
 }
 
 void Trie::insert(const std::string& word) {
     TrieNode* cur = root;
-    for (char ch : word) {
-        if (!cur->next[ch]) cur->next[ch] = new TrieNode();
-        cur = cur->next[ch];
+    for (char c : word) {
+        if (!cur->next[c]) cur->next[c] = new TrieNode();
+        cur = cur->next[c];
     }
     cur->end = true;
 }
 
-void Trie::collect(TrieNode* node, std::string prefix, std::vector<std::string>& out) {
-    if (!node) return;
-    if (node->end) out.push_back(prefix);
-    for (auto &p : node->next) collect(p.second, prefix + p.first, out);
+void Trie::collect(TrieNode* n, std::string pref, std::vector<std::string>& out) {
+    if (n->end) out.push_back(pref);
+    for (auto& p : n->next)
+        collect(p.second, pref + p.first, out);
 }
 
 std::vector<std::string> Trie::autocomplete(const std::string& prefix) {
-    std::vector<std::string> out;
     TrieNode* cur = root;
-    for (char ch : prefix) {
-        if (!cur->next[ch]) return out;
-        cur = cur->next[ch];
+    for (char c : prefix) {
+        if (!cur->next[c]) return {};
+        cur = cur->next[c];
     }
-    collect(cur, prefix, out);
-    return out;
+    std::vector<std::string> r;
+    collect(cur, prefix, r);
+    return r;
 }

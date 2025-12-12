@@ -11,33 +11,25 @@ private:
     int nextId;
 
     void deleteSubtree(Node* n);
-    int computeMaxId(Node* n);
-    std::vector<std::string> splitPath(const std::string& path);
+    int findMaxId(Node* n);
+    std::vector<std::string> split(const std::string& path);
 
 public:
     Tree();
     ~Tree();
 
-    Node* getRoot() const;
+    Node* getRoot();
     int getNextId() const;
 
-    // Core operations
-    Node* findByPath(const std::string& path);           // "/a/b/c"
-    bool insertNode(const std::string& parentPath, const std::string& name, NodeType tipo);
-    bool moveNode(const std::string& origenPath, const std::string& destPath);
-    bool renameNode(const std::string& path, const std::string& nuevoNombre);
-    bool removeToTrash(const std::string& path);        // mueve a /.trash
-    bool restoreFromTrash(int id, const std::string& destPath); // restaura por id desde /.trash
-    bool permanentDelete(const std::string& path);      // borra definitivamente
-    std::vector<Node*> listChildren(const std::string& path);
-    std::string getFullPath(Node* nodo);
-    std::vector<Node*> preorder();                      // export preorden
+    Node* find(const std::string& path);
+    bool insert(const std::string& parent, const std::string& name, NodeType tipo);
+    bool renameNode(const std::string& path, const std::string& nuevo);
+    bool move(const std::string& origen, const std::string& destino);
+    bool removeToTrash(const std::string& path);
+    bool permanentDelete(const std::string& path);
+    bool restore(int id, const std::string& destino);
 
-    // helpers: trash management
-    Node* ensureTrash();                                // crea /.trash si no existe
-
-    // persistence helpers (JSON manager usará getRoot / setRoot)
-    void setRoot(Node* r); // toma ownership: borra anterior
+    std::vector<Node*> preorder();
 };
 
-#endif // TREE_H
+#endif
