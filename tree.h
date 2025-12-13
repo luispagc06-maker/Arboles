@@ -13,16 +13,15 @@ public:
     ~Tree();
 
     Node* getRoot();
-    void setRoot(Node* r);
-
+    Node* insert(Node* parent, int id, const std::string& nombre, NodeType tipo);
     Node* findById(Node* actual, int id);
 
-    Node* insert(Node* parent, int id, const std::string& nombre, NodeType tipo);
-    bool remove(Node* nodo);
     bool move(Node* nodo, Node* nuevoPadre);
-    bool rename(Node* nodo, const std::string& nuevoNombre);
+    bool remove(Node* nodo);
+    bool rename(Node* nodo, const std::string& nuevo);
 
-    void printPreorden(Node* n);
+    void preorden(Node* nodo, int nivel);
 };
 
 #endif
+

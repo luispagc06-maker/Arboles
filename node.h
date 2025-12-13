@@ -17,7 +17,6 @@ public:
     std::vector<Node*> children;
 
     Node(int _id, const std::string& _nombre, NodeType _tipo);
-
     ~Node();
 };
 

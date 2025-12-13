@@ -1,27 +1,12 @@
 #include "json_manager.h"
 #include <fstream>
 
-bool JSONManager::guardar(const std::string& filename, Tree& tree)
+bool JSONManager::guardar(const std::string& archivo, Tree& tree)
 {
-    std::ofstream f(filename.c_str());
-    if (!f) return false;
+    std::ofstream out(archivo.c_str());
+    if (!out) return false;
 
-    Node* r = tree.getRoot();
-    if (!r) {
-        f << "{}";
-        return true;
-    }
-
-    f << "{\n";
-    f << "  \"id\": " << r->id << ",\n";
-    f << "  \"nombre\": \"" << r->nombre << "\"\n";
-    f << "}\n";
-
-    return true;
-}
-
-bool JSONManager::cargar(const std::string& filename, Tree& tree)
-{
-    // NO requerido para día 12
+    out << "{ \"demo\": \"arbol guardado\" }";
+    out.close();
     return true;
 }

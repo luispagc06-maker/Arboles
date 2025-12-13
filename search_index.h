@@ -10,7 +10,7 @@ private:
 
 public:
     void add(const std::string& nombre, int id);
-    int buscar(const std::string& nombre);
+    int find(const std::string& nombre);
 };
 
 #endif

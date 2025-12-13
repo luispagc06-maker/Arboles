@@ -1,30 +1,24 @@
-
 #ifndef TRIE_H
 #define TRIE_H
 
-#include <string>
 #include <map>
+#include <string>
 #include <vector>
 
 class Trie {
 private:
-    struct NodoTrie {
+    struct Nodo {
         bool fin;
-        std::map<char, NodoTrie*> hijos;
-        std::vector<int> ids;
-
-        NodoTrie() : fin(false) {}
+        std::map<char, Nodo*> hijos;
+        Nodo() : fin(false) {}
     };
 
-    NodoTrie* root;
-
-    void autoRecorrer(NodoTrie* nodo, std::string prefijo, std::vector<std::string>& out);
+    Nodo* root;
+    void recolectar(Nodo* n, std::string pref, std::vector<std::string>& res);
 
 public:
     Trie();
-    ~Trie();
-
-    void insertar(const std::string& palabra, int id);
+    void insertar(const std::string& palabra);
     std::vector<std::string> autocompletar(const std::string& prefijo);
 };
 

@@ -2,28 +2,19 @@
 #include <iostream>
 
 Tree::Tree() {
-    root = nullptr;
+    root = 0;
 }
 
 Tree::~Tree() {
     delete root;
 }
 
-Node* Tree::getRoot() { return root; }
-void Tree::setRoot(Node* r) { root = r; }
-
-Node* Tree::findById(Node* actual, int id) {
-    if (!actual) return nullptr;
-    if (actual->id == id) return actual;
-
-    for (Node* h : actual->children) {
-        Node* f = findById(h, id);
-        if (f) return f;
-    }
-    return nullptr;
+Node* Tree::getRoot() {
+    return root;
 }
 
-Node* Tree::insert(Node* parent, int id, const std::string& nombre, NodeType tipo) {
+Node* Tree::insert(Node* parent, int id, const std::string& nombre, NodeType tipo)
+{
     Node* nuevo = new Node(id, nombre, tipo);
     nuevo->parent = parent;
 
@@ -35,11 +26,41 @@ Node* Tree::insert(Node* parent, int id, const std::string& nombre, NodeType tip
     return nuevo;
 }
 
-bool Tree::remove(Node* nodo) {
+Node* Tree::findById(Node* actual, int id)
+{
+    if (!actual) return 0;
+    if (actual->id == id) return actual;
+
+    for (size_t i = 0; i < actual->children.size(); i++) {
+        Node* r = findById(actual->children[i], id);
+        if (r) return r;
+    }
+    return 0;
+}
+
+bool Tree::move(Node* nodo, Node* nuevoPadre)
+{
+    if (!nodo || !nuevoPadre || nodo == root) return false;
+
+    Node* p = nodo->parent;
+    for (size_t i = 0; i < p->children.size(); i++) {
+        if (p->children[i] == nodo) {
+            p->children.erase(p->children.begin() + i);
+            break;
+        }
+    }
+
+    nodo->parent = nuevoPadre;
+    nuevoPadre->children.push_back(nodo);
+    return true;
+}
+
+bool Tree::remove(Node* nodo)
+{
     if (!nodo || nodo == root) return false;
 
     Node* p = nodo->parent;
-    for (int i = 0; i < p->children.size(); i++) {
+    for (size_t i = 0; i < p->children.size(); i++) {
         if (p->children[i] == nodo) {
             p->children.erase(p->children.begin() + i);
             delete nodo;
@@ -49,34 +70,20 @@ bool Tree::remove(Node* nodo) {
     return false;
 }
 
-bool Tree::move(Node* nodo, Node* nuevoPadre) {
-    if (!nodo || nodo == root) return false;
-
-    Node* p = nodo->parent;
-    for (int i = 0; i < p->children.size(); i++) {
-        if (p->children[i] == nodo) {
-            p->children.erase(p->children.begin() + i);
-            break;
-        }
-    }
-
-    nodo->parent = nuevoPadre;
-    nuevoPadre->children.push_back(nodo);
-
-    return true;
-}
-
-bool Tree::rename(Node* nodo, const std::string& nuevoNombre) {
+bool Tree::rename(Node* nodo, const std::string& nuevo)
+{
     if (!nodo) return false;
-    nodo->nombre = nuevoNombre;
+    nodo->nombre = nuevo;
     return true;
 }
 
-void Tree::printPreorden(Node* n) {
-    if (!n) return;
+void Tree::preorden(Node* nodo, int nivel)
+{
+    if (!nodo) return;
 
-    std::cout << n->id << " - " << n->nombre << std::endl;
+    for (int i = 0; i < nivel; i++) std::cout << "  ";
+    std::cout << nodo->nombre << std::endl;
 
-    for (Node* h : n->children)
-        printPreorden(h);
+    for (size_t i = 0; i < nodo->children.size(); i++)
+        preorden(nodo->children[i], nivel + 1);
 }
