@@ -1,4 +1,3 @@
-
 #ifndef JSON_MANAGER_H
 #define JSON_MANAGER_H
 
@@ -7,7 +6,7 @@
 
 class JSONManager {
 public:
-    static bool guardar(const std::string& archivo, Tree& tree);
+    static bool guardar(const std::string& archivo, Tree& t);
 };
 
 #endif

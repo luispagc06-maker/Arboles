@@ -1,10 +1,10 @@
 #include "node.h"
 
-Node::Node(int _id, const std::string& _nombre, NodeType _tipo)
+Node::Node(int id_, const std::string& nombre_, NodeType tipo_)
 {
-    id = _id;
-    nombre = _nombre;
-    tipo = _tipo;
+    id = id_;
+    nombre = nombre_;
+    tipo = tipo_;
     parent = 0;
 }
 

@@ -14,12 +14,12 @@ private:
     };
 
     Nodo* root;
-    void recolectar(Nodo* n, std::string pref, std::vector<std::string>& res);
+    void recolectar(Nodo* n, std::string pref, std::vector<std::string>& r);
 
 public:
     Trie();
     void insertar(const std::string& palabra);
-    std::vector<std::string> autocompletar(const std::string& prefijo);
+    std::vector<std::string> autocompletar(const std::string& pref);
 };
 
 #endif

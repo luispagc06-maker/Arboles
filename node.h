@@ -11,12 +11,11 @@ public:
     int id;
     std::string nombre;
     NodeType tipo;
-    std::string contenido;
 
     Node* parent;
     std::vector<Node*> children;
 
-    Node(int _id, const std::string& _nombre, NodeType _tipo);
+    Node(int id, const std::string& nombre, NodeType tipo);
     ~Node();
 };
 

@@ -7,21 +7,23 @@
 class Tree {
 private:
     Node* root;
+    int nextId;
 
 public:
     Tree();
     ~Tree();
 
     Node* getRoot();
-    Node* insert(Node* parent, int id, const std::string& nombre, NodeType tipo);
-    Node* findById(Node* actual, int id);
+    Node* findById(Node* n, int id);
 
-    bool move(Node* nodo, Node* nuevoPadre);
+    Node* mkdir(Node* parent, const std::string& nombre);
+    Node* touch(Node* parent, const std::string& nombre);
+
     bool remove(Node* nodo);
-    bool rename(Node* nodo, const std::string& nuevo);
+    bool move(Node* nodo, Node* nuevoPadre);
+    bool rename(Node* nodo, const std::string& nuevoNombre);
 
-    void preorden(Node* nodo, int nivel);
+    void preorden(Node* n, int nivel);
 };
 
 #endif
-
